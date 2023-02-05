@@ -16,6 +16,7 @@ class MyProductsPage extends StatefulWidget {
 
 class _MyProductsPageState extends State<MyProductsPage> {
   final AppDb database = AppDb();
+
   Future insert(String nameProduct, String stock, String unitPrice) async {
     DateTime now = DateTime.now();
     final row = await database.into(database.myProducts).insertReturning(
@@ -34,10 +35,16 @@ class _MyProductsPageState extends State<MyProductsPage> {
     return await database.getAllProductRepo();
   }
 
+  Future update(int myProductId, String newNameProduct, int newStock,
+      int newUnitPrice) async {
+    await database.updateMyProductRepo(
+        myProductId, newNameProduct, newStock, newUnitPrice);
+  }
+
   final _formKey = GlobalKey<FormState>();
-  final inputNewProduct = TextEditingController();
-  final inputStock = TextEditingController();
-  final inputUnitPrice = TextEditingController();
+  TextEditingController inputNewProduct = TextEditingController();
+  TextEditingController inputStock = TextEditingController();
+  TextEditingController inputUnitPrice = TextEditingController();
 
   @override
   void dispose() {
@@ -48,242 +55,17 @@ class _MyProductsPageState extends State<MyProductsPage> {
     super.dispose();
   }
 
-  @override
-  Widget build(BuildContext context) {
-    DateTime now = DateTime.now();
-    String formattedDateNow = DateFormat('dd MMM, yyyy').format(now);
+  AwesomeDialog openDialog(MyProduct? myProduct, String titleDialog) {
+    if (myProduct != null) {
+      inputNewProduct.text = myProduct.nameProduct;
+      inputStock.text = myProduct.stock.toString();
+      inputUnitPrice.text = myProduct.unitPrice.toString();
+    } else {
+      inputNewProduct.text = "";
+      inputStock.text = "";
+      inputUnitPrice.text = "";
+    }
 
-    return SafeArea(
-      child: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          "Hi, Admin !",
-                          style: blackTextStyle.copyWith(
-                            fontSize: 24.0,
-                            color: Colors.white,
-                          ),
-                        ),
-                        Text(
-                          formattedDateNow,
-                          style: blackTextStyle.copyWith(
-                              fontSize: 10.0, color: tertiaryColor),
-                        ),
-                      ],
-                    ),
-                    const DropdownWidget(
-                      iconColor: Colors.white,
-                    ),
-                  ],
-                )
-              ],
-            ),
-          ),
-          Expanded(
-            child: Container(
-              width: MediaQuery.of(context).size.width,
-              // height: MediaQuery.of(context).size.height
-              decoration: const BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(50),
-                ),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(20.0),
-                child: ListView(
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "My Product",
-                              style: blackTextStyle.copyWith(
-                                fontSize: 24.0,
-                              ),
-                            ),
-                            InkWell(
-                              child: const Icon(
-                                Icons.add,
-                              ),
-                              onTap: () {
-                                awesomeDialogWidget(context).show();
-                              },
-                            )
-                          ],
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                        FutureBuilder<List<MyProduct>>(
-                          future: getAllProduct(),
-                          builder: (context, snapshot) {
-                            if (snapshot.connectionState ==
-                                ConnectionState.waiting) {
-                              return Center(
-                                child: CircularProgressIndicator(),
-                              );
-                            } else {
-                              if (snapshot.hasData) {
-                                if (snapshot.data!.isNotEmpty) {
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: snapshot.data?.length,
-                                    itemBuilder: (context, index) {
-                                      return Table(
-                                        children: [
-                                          const TableRow(
-                                            children: [
-                                              Text(
-                                                "Name Product",
-                                              ),
-                                              Text("Stock"),
-                                              Text("Unit Price"),
-                                              Text(""),
-                                            ],
-                                          ),
-                                          TableRow(
-                                            children: [
-                                              Text(
-                                                snapshot
-                                                    .data![index].nameProduct,
-                                              ),
-                                              Text(
-                                                  "${snapshot.data![index].stock}"),
-                                              Text(
-                                                  "Rp ${snapshot.data![index].unitPrice}"),
-                                              Column(
-                                                children: [
-                                                  TextButton(
-                                                    style: ButtonStyle(
-                                                      backgroundColor:
-                                                          MaterialStateProperty
-                                                              .all(
-                                                                  Colors.amber),
-                                                      shape: MaterialStateProperty
-                                                          .all<
-                                                              RoundedRectangleBorder>(
-                                                        RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      8.0),
-                                                          side:
-                                                              const BorderSide(
-                                                                  color: Colors
-                                                                      .amber),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    onPressed: () {
-                                                      // Navigator.pop(context);
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: const [
-                                                        Icon(
-                                                          Icons.edit,
-                                                        ),
-                                                        Text(
-                                                          "Edit",
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                  SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                  TextButton(
-                                                    style: ButtonStyle(
-                                                      backgroundColor:
-                                                          MaterialStateProperty
-                                                              .all(Colors.red),
-                                                      shape: MaterialStateProperty
-                                                          .all<
-                                                              RoundedRectangleBorder>(
-                                                        RoundedRectangleBorder(
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(
-                                                                      8.0),
-                                                          side:
-                                                              const BorderSide(
-                                                                  color: Colors
-                                                                      .red),
-                                                        ),
-                                                      ),
-                                                    ),
-                                                    onPressed: () {
-                                                      // Navigator.pop(context);
-                                                    },
-                                                    child: Row(
-                                                      mainAxisAlignment:
-                                                          MainAxisAlignment
-                                                              .center,
-                                                      children: const [
-                                                        Icon(
-                                                          Icons.delete,
-                                                        ),
-                                                        Text(
-                                                          "Delete",
-                                                        ),
-                                                      ],
-                                                    ),
-                                                  ),
-                                                ],
-                                              )
-                                            ],
-                                          ),
-                                        ],
-                                      );
-                                    },
-                                  );
-                                } else {
-                                  return Center(
-                                    child: Text(
-                                      "No Data",
-                                      style: blackTextStyle,
-                                    ),
-                                  );
-                                }
-                              } else {
-                                return Center(
-                                  child: Text(
-                                    "Loading",
-                                    style: blackTextStyle,
-                                  ),
-                                );
-                              }
-                            }
-                          },
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  AwesomeDialog awesomeDialogWidget(BuildContext context) {
     return AwesomeDialog(
       context: context,
       showCloseIcon: true,
@@ -296,7 +78,7 @@ class _MyProductsPageState extends State<MyProductsPage> {
           child: Column(
             children: [
               Text(
-                "Add New Product",
+                titleDialog,
                 style: blackTextStyle.copyWith(
                   fontSize: 20.0,
                 ),
@@ -383,16 +165,258 @@ class _MyProductsPageState extends State<MyProductsPage> {
           ),
         ),
         onPressed: () {
-          setState(() {});
           // Add New Product
-          insert(inputNewProduct.text, inputStock.text, inputUnitPrice.text);
+          if (myProduct == null) {
+            insert(inputNewProduct.text, inputStock.text, inputUnitPrice.text);
+            inputNewProduct.clear();
+            inputStock.clear();
+            inputUnitPrice.clear();
+          } else {
+            update(myProduct.id, inputNewProduct.text,
+                int.parse(inputStock.text), int.parse(inputUnitPrice.text));
+            inputNewProduct.clear();
+            inputStock.clear();
+            inputUnitPrice.clear();
+          }
+          setState(() {});
           // Navigator.of(context, rootNavigator: true).pop('dialog');
           Navigator.pop(context);
         },
         child: const Text(
-          "Add",
+          "Save",
           style: TextStyle(color: Colors.white),
         ),
+      ),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    DateTime now = DateTime.now();
+    String formattedDateNow = DateFormat('dd MMM, yyyy').format(now);
+
+    return SafeArea(
+      child: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.all(10),
+            child: Column(
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          "Hi, Admin !",
+                          style: blackTextStyle.copyWith(
+                            fontSize: 24.0,
+                            color: Colors.white,
+                          ),
+                        ),
+                        Text(
+                          formattedDateNow,
+                          style: blackTextStyle.copyWith(
+                              fontSize: 10.0, color: tertiaryColor),
+                        ),
+                      ],
+                    ),
+                    const DropdownWidget(
+                      iconColor: Colors.white,
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+          Expanded(
+            child: Container(
+              width: MediaQuery.of(context).size.width,
+              // height: MediaQuery.of(context).size.height
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(50),
+                ),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(20.0),
+                child: Column(
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          "My Product",
+                          style: blackTextStyle.copyWith(
+                            fontSize: 24.0,
+                          ),
+                        ),
+                        InkWell(
+                          child: const Icon(
+                            Icons.add,
+                          ),
+                          onTap: () {
+                            // awesomeDialogWidget(context).show();
+                            openDialog(null, "Add Product").show();
+                          },
+                        )
+                      ],
+                    ),
+                    const SizedBox(
+                      height: 20,
+                    ),
+                    FutureBuilder<List<MyProduct>>(
+                      future: getAllProduct(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
+                          return Center(
+                            child: CircularProgressIndicator(),
+                          );
+                        } else {
+                          if (snapshot.hasData) {
+                            if (snapshot.data!.isNotEmpty) {
+                              return ListView.builder(
+                                shrinkWrap: true,
+                                itemCount: snapshot.data?.length,
+                                itemBuilder: (context, index) {
+                                  return Table(
+                                    children: [
+                                      const TableRow(
+                                        children: [
+                                          Text(
+                                            "Name Product",
+                                          ),
+                                          Text("Stock"),
+                                          Text("Unit Price"),
+                                          Text(""),
+                                        ],
+                                      ),
+                                      TableRow(
+                                        children: [
+                                          Text(
+                                            snapshot.data![index].nameProduct,
+                                          ),
+                                          Text(
+                                              "${snapshot.data![index].stock}"),
+                                          Text(
+                                              "Rp ${snapshot.data![index].unitPrice}"),
+                                          Column(
+                                            children: [
+                                              TextButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          Colors.amber),
+                                                  shape:
+                                                      MaterialStateProperty.all<
+                                                          RoundedRectangleBorder>(
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      side: const BorderSide(
+                                                          color: Colors.amber),
+                                                    ),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  // Navigator.pop(context);
+                                                  openDialog(
+                                                          snapshot.data![index],
+                                                          "Edit Product")
+                                                      .show();
+                                                },
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: const [
+                                                    Icon(
+                                                      Icons.edit,
+                                                    ),
+                                                    Text(
+                                                      "Edit",
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                              SizedBox(
+                                                height: 5,
+                                              ),
+                                              TextButton(
+                                                style: ButtonStyle(
+                                                  backgroundColor:
+                                                      MaterialStateProperty.all(
+                                                          Colors.red),
+                                                  shape:
+                                                      MaterialStateProperty.all<
+                                                          RoundedRectangleBorder>(
+                                                    RoundedRectangleBorder(
+                                                      borderRadius:
+                                                          BorderRadius.circular(
+                                                              8.0),
+                                                      side: const BorderSide(
+                                                          color: Colors.red),
+                                                    ),
+                                                  ),
+                                                ),
+                                                onPressed: () {
+                                                  // Navigator.pop(context);
+                                                  database.deleteMyProductRepo(
+                                                      snapshot.data![index].id);
+                                                  setState(() {});
+                                                },
+                                                child: Row(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: const [
+                                                    Icon(
+                                                      Icons.delete,
+                                                      color: Colors.white,
+                                                    ),
+                                                    Text(
+                                                      "Delete",
+                                                      style: TextStyle(
+                                                          color: Colors.white),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                    ],
+                                  );
+                                },
+                              );
+                            } else {
+                              return Center(
+                                child: Text(
+                                  "No Data",
+                                  style: blackTextStyle,
+                                ),
+                              );
+                            }
+                          } else {
+                            return Center(
+                              child: Text(
+                                "Loading",
+                                style: blackTextStyle,
+                              ),
+                            );
+                          }
+                        }
+                      },
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

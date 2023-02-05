@@ -24,6 +24,21 @@ class AppDb extends _$AppDb {
   Future<List<MyProduct>> getAllProductRepo() async {
     return await (select(myProducts)).get();
   }
+
+  Future updateMyProductRepo(
+      int id, String newNameProduct, int newStock, int newUnitPrice) async {
+    return await (update(myProducts)..where((tbl) => tbl.id.equals(id))).write(
+      MyProductsCompanion(
+        nameProduct: Value(newNameProduct),
+        stock: Value(newStock),
+        unitPrice: Value(newUnitPrice),
+      ),
+    );
+  }
+
+  Future deleteMyProductRepo(int id) async {
+    return (delete(myProducts)..where((tbl) => tbl.id.equals(id))).go();
+  }
 }
 
 LazyDatabase _openConnection() {
